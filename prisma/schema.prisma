@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,8 +9,48 @@ datasource db {
 }
 
 model Usuario {
-  USUA_ID                Int                      @id @default(autoincrement()) @db.Int
-  USUA_Nome              String                   @db.VarChar(125)
-  USUA_Email             String                   @db.VarChar(125)
-  USUA_Senha             String                   @db.VarChar(255)
+  USUA_ID    Int    @id @default(autoincrement()) @db.Int
+  USUA_Nome  String @db.VarChar(125)
+  USUA_Email String @db.VarChar(125)
+  USUA_Senha String @db.VarChar(255)
+}
+
+model Modalidade {
+  MODL_ID   Int    @id @default(autoincrement()) @db.Int
+  MODL_Nome String @db.VarChar(100)
+  Aulas     Aula[]
+}
+
+model Aula {
+  AULA_ID    Int         @id @default(autoincrement()) @db.Int
+  MODL_ID    Int         @db.Int
+  Modalidade Modalidade  @relation(fields: [MODL_ID], references: [MODL_ID])
+  Observacao String?     @db.LongText
+  AlunoAulas AlunoAula[]
+}
+
+model Aluno {
+  ALUN_ID              Int         @id @default(autoincrement()) @db.Int
+  ALUN_Nome            String      @db.VarChar(255)
+  ALUN_Altura          Int         @db.Int
+  ALUN_Peso            Decimal     @db.Decimal(5, 2)
+  ALUN_Lesao           String?     @db.VarChar(255)
+  ALUN_Email           String?     @db.VarChar(255)
+  ALUN_Telefone        String?     @db.VarChar(255)
+  ALUN_CPF             String?     @db.VarChar(255)
+  ALUN_DataNascimento  DateTime?   @db.Date
+  ALUN_Objetivo        String?     @db.VarChar(255)
+  ALUN_IndicacaoMedica String?     @db.VarChar(255)
+  ALUN_NomeImagem      String?     @db.LongText
+  ALUN_Base64Imagem    String?     @db.LongText
+  AlunoAulas           AlunoAula[]
+}
+
+model AlunoAula {
+  ALUN_ID Int
+  AULA_ID Int
+  Aluno   Aluno @relation(fields: [ALUN_ID], references: [ALUN_ID])
+  Aula    Aula  @relation(fields: [AULA_ID], references: [AULA_ID])
+
+  @@id([ALUN_ID, AULA_ID]) // Composite primary key
 }

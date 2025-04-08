@@ -15,9 +15,7 @@ const mapUsuario = (usuario: dbUsuario): getUsuario => ({
 });
 
 export const listaUsuario = async (): Promise<getUsuario[]> => {
-    const usuarios: dbUsuario[] = await prisma.usuario.findMany({
-        include: { Hotel: true },
-    });
+    const usuarios: dbUsuario[] = await prisma.usuario.findMany();
     const mappedUsuarios: getUsuario[] = usuarios.map((usuario) =>
         mapUsuario(usuario)
     );
@@ -62,8 +60,7 @@ export const atualizarUsuario = async (
             USUA_Nome: data.nome,
             USUA_Email: data.email,
             USUA_Senha: data.senha
-        },
-        include: { Hotel: true },
+        }
     });
     const updatedUsuario: getUsuario = {
         id: usuario.USUA_ID,
@@ -80,16 +77,14 @@ export const logUser = async (
         where: {
             USUA_Email: data.email,
             USUA_Senha: data.senha
-        },
-        include: { Hotel: true },
+        }
     });
     if (!user) return null;
 
     const token: JwtPayload = {
         id: user.USUA_ID,
         nome: user.USUA_Nome,
-        email: user.USUA_Email,
-        hotelId: user.HOTL_ID,
+        email: user.USUA_Email
     };
     const tokenValidated = generateToken(token);
 

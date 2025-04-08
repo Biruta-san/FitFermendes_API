@@ -7,7 +7,6 @@ export interface JwtPayload {
     id: number;
     nome: string;
     email: string;
-    hotelId?: number | null;
 }
 
 export const generateToken = (payload: JwtPayload): string | null => {

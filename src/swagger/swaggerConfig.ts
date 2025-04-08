@@ -21,7 +21,12 @@ const options = {
       },
     },
     tags: [
-      { name: "Usuário", description: "Endpoints relacionados a usuários" }
+      { name: "Usuário", description: "Endpoints relacionados a usuários" },
+      {
+        name: "Modalidade",
+        description: "Endpoints relacionados a modalidade",
+      },
+      { name: "Aluno", description: "Endpoints relacionados a aluno" },
     ],
   },
   apis: ["./src/controllers/*.ts"],

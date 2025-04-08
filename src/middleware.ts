@@ -16,6 +16,5 @@ export function authenticateToken(
 
   req.headers.usuarioId = `${tokenValidated.id}`;
   req.headers.usuarioNome = `${tokenValidated.nome}`;
-  req.headers.hotelId = `${tokenValidated.hotelId}`;
   next();
 }

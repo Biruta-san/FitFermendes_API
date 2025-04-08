@@ -1,26 +1,25 @@
 import { Request, Response } from "express";
 import {
-  atualizarUsuario,
-  consultarUsuario,
-  inserirUsuario,
-  listaUsuario,
-  logUser,
-} from "../services/userService";
+  atualizarAluno,
+  consultarAluno,
+  inserirAluno,
+  listaAluno,
+} from "../services/alunoService";
 
 /**
  * @swagger
  * tags:
- *   - name: Usuário
+ *   - name: Aluno
  *     description: Endpoints relacionados a usuários
  */
 
 /**
  * @swagger
- * /usuario/lista:
+ * /aluno/lista:
  *   get:
  *     summary: Retorna uma lista de usuários
  *     tags:
- *       - Usuário
+ *       - Aluno
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -40,12 +39,11 @@ import {
  *                   email:
  *                     type: string
  */
-export async function getListaUsuario(req: Request, res: Response) {
+export async function getListaAluno(req: Request, res: Response) {
   try {
-    const usuario = await listaUsuario();
-    if (!usuario)
-      return res.status(404).json({ error: "Usuário não encontrado" });
-    res.status(200).json(usuario);
+    const aluno = await listaAluno();
+    if (!aluno) return res.status(404).json({ error: "Aluno não encontrado" });
+    res.status(200).json(aluno);
   } catch (error) {
     res.status(500).json({ error });
   }
@@ -53,11 +51,11 @@ export async function getListaUsuario(req: Request, res: Response) {
 
 /**
  * @swagger
- * /usuario/{id}:
+ * /aluno/{id}:
  *   get:
  *     summary: Retorna um usuário pelo ID
  *     tags:
- *       - Usuário
+ *       - Aluno
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -69,7 +67,7 @@ export async function getListaUsuario(req: Request, res: Response) {
  *           type: integer
  *     responses:
  *       200:
- *         description: Um Usuário
+ *         description: Um Aluno
  *         content:
  *           application/json:
  *             schema:
@@ -82,14 +80,13 @@ export async function getListaUsuario(req: Request, res: Response) {
  *                 email:
  *                   type: string
  *       404:
- *         description: Usuário não encontrado
+ *         description: Aluno não encontrado
  */
-export async function getUsuario(req: Request, res: Response) {
+export async function getAluno(req: Request, res: Response) {
   try {
-    const usuario = await consultarUsuario(parseInt(req.params.id, 10));
-    if (!usuario)
-      return res.status(404).json({ error: "Usuário não encontrado" });
-    res.json(usuario);
+    const aluno = await consultarAluno(parseInt(req.params.id, 10));
+    if (!aluno) return res.status(404).json({ error: "Aluno não encontrado" });
+    res.json(aluno);
   } catch (error) {
     res.status(500).json({ error: "Erro ao consultar usuário" });
   }
@@ -97,94 +94,11 @@ export async function getUsuario(req: Request, res: Response) {
 
 /**
  * @swagger
- * /usuario/login:
- *   post:
- *     summary: Realiza login na aplicação
- *     tags:
- *       - Usuário
- *     security: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - senha
- *             properties:
- *               email:
- *                 type: string
- *               senha:
- *                 type: string
- *     responses:
- *       200:
- *         description: Um Usuário
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *       404:
- *         description: Usuário não encontrado
- *       500:
- *         description: Erro ao realizar login
- */
-export async function login(req: Request, res: Response) {
-  try {
-    const { email, senha } = req.body;
-    const token = await logUser({
-      email: email,
-      senha: senha,
-    });
-    if (!token)
-      return res.status(404).json({ error: "Usuário não encontrado" });
-    res.json(token);
-  } catch (error) {
-    res.status(500).json({ error: "Erro ao realizar login" });
-  }
-}
-
-/**
- * @swagger
- * /usuario/data:
- *   post:
- *     summary: Realiza login na aplicação
- *     tags:
- *       - Usuário
- *     security: []
- *     responses:
- *       200:
- *         description: Um Usuário
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *       404:
- *         description: Usuário não encontrado
- *       500:
- *         description: Erro ao consultar data
- */
-export async function getData(req: Request, res: Response) {
-  try {
-    res.json({ data: new Date() });
-  } catch (error) {
-    res.status(500).json({ error: "Erro ao consultar data" });
-  }
-}
-
-/**
- * @swagger
- * /usuario:
+ * /aluno:
  *   post:
  *     summary: Insere um usuário e retorna o usuário inserido
  *     tags:
- *       - Usuário
+ *       - Aluno
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -219,10 +133,10 @@ export async function getData(req: Request, res: Response) {
  *                 email:
  *                   type: string
  */
-export async function postUsuario(req: Request, res: Response) {
+export async function postAluno(req: Request, res: Response) {
   try {
-    const usuario = await inserirUsuario(req.body);
-    res.status(201).json(usuario);
+    const aluno = await inserirAluno(req.body);
+    res.status(201).json(aluno);
   } catch (error) {
     res.status(500).json({ error: "Erro Inserindo usuário" });
   }
@@ -230,11 +144,11 @@ export async function postUsuario(req: Request, res: Response) {
 
 /**
  * @swagger
- * /usuario/{id}:
+ * /aluno/{id}:
  *   put:
  *     summary: Atualiza um usuário existente
  *     tags:
- *       - Usuário
+ *       - Aluno
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -263,7 +177,7 @@ export async function postUsuario(req: Request, res: Response) {
  *                 nullable: true
  *     responses:
  *       200:
- *         description: Usuário atualizado com sucesso
+ *         description: Aluno atualizado com sucesso
  *         content:
  *           application/json:
  *             schema:
@@ -280,13 +194,10 @@ export async function postUsuario(req: Request, res: Response) {
  *       500:
  *         description: Erro no servidor
  */
-export async function putUsuario(req: Request, res: Response) {
+export async function putAluno(req: Request, res: Response) {
   try {
-    const usuario = await atualizarUsuario(
-      parseInt(req.params.id, 10),
-      req.body
-    );
-    res.status(200).json(usuario);
+    const aluno = await atualizarAluno(parseInt(req.params.id, 10), req.body);
+    res.status(200).json(aluno);
   } catch (error) {
     res.status(500).json({ error: "Erro atualizando usuário" });
   }
