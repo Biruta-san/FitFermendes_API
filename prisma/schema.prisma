@@ -9,10 +9,22 @@ datasource db {
 }
 
 model Usuario {
-  USUA_ID    Int    @id @default(autoincrement()) @db.Int
-  USUA_Nome  String @db.VarChar(125)
-  USUA_Email String @db.VarChar(125)
-  USUA_Senha String @db.VarChar(255)
+  USUA_ID       Int                   @id @default(autoincrement()) @db.Int
+  USUA_Nome     String                @db.VarChar(125)
+  USUA_Email    String                @db.VarChar(125)
+  USUA_Senha    String                @db.VarChar(255)
+  TwoFactorAuth UsuarioAutenticacao[]
+}
+
+model UsuarioAutenticacao {
+  TWFA_ID              Int      @id @default(autoincrement())
+  USUA_ID              Int
+  TWFA_Codigo          String?  @db.VarChar(255) // Código temporário gerado (se estiver usando código OTP)
+  TWFA_DataExpiracao   DateTime // Hora de expiração do código
+  TWFA_DataCriacao     DateTime @default(now())
+  TWFA_DataAtualizacao DateTime @updatedAt
+
+  Usuario Usuario @relation(fields: [USUA_ID], references: [USUA_ID])
 }
 
 model Modalidade {
