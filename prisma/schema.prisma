@@ -19,7 +19,8 @@ model Usuario {
 model UsuarioAutenticacao {
   TWFA_ID              Int      @id @default(autoincrement())
   USUA_ID              Int
-  TWFA_Codigo          String?  @db.VarChar(255) // Código temporário gerado (se estiver usando código OTP)
+  TWFA_Codigo          String?  @db.VarChar(255) // Código temporário gerado 
+  TWFA_Verificador     String?  @db.VarChar(255) // Verificador gerado 
   TWFA_DataExpiracao   DateTime // Hora de expiração do código
   TWFA_DataCriacao     DateTime @default(now())
   TWFA_DataAtualizacao DateTime @updatedAt

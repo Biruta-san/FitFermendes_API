@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import {
   dbUsuario,
   getUsuario,
@@ -6,7 +7,9 @@ import {
   postUsuario,
 } from "../models/userModels";
 import prisma from "../prismaClient";
-import { encriptar } from "../utils/crypto";
+import { twoFactorAuthEmail } from "../utils/constants";
+import { decriptar, encriptar } from "../utils/crypto";
+import { sendEmail } from "../utils/mail";
 import { generateToken, JwtPayload } from "../utils/token";
 import speakeasy from "speakeasy";
 
@@ -87,31 +90,80 @@ export const validarCredenciais = async (
   if (!process.env.TOTP_SECRET) return false;
 
   const otp = speakeasy.totp({
-    secret: process.env.TOTP_SECRET, // Segredo compartilhado (você pode configurar ou gerar um novo para cada usuário)
+    secret: process.env.TOTP_SECRET,
     encoding: "base32",
   });
   const encryptedOtp = encriptar(otp);
+  const verificador = randomUUID();
 
   const usuario2FA = prisma.UsuarioAutenticacao.upsert({
     where: { USUA_ID: user.USUA_ID },
     update: {
       TWFA_Codigo: encryptedOtp,
       TWFA_DataExpiracao: new Date(Date.now() + 5 * 60 * 1000), // Define a expiração para 5 minutos
+      TWFA_Verificador: verificador,
     },
     create: {
       USUA_ID: user.USUA_ID,
       TWFA_Codigo: encryptedOtp,
       TWFA_DataExpiracao: new Date(Date.now() + 5 * 60 * 1000),
+      TWFA_Verificador: verificador,
     },
   });
 
-  // TODO IMPLEMENTAR LOGICA PARA ENVIAR UM EMAIL COM O CODIGO
+  sendEmail(
+    user.USUA_Email,
+    "Código de verificação",
+    twoFactorAuthEmail(otp, "5 minutos"),
+    true
+  );
 
   return !!usuario2FA;
 };
 
-export const validar2FA = async (): Promise<loginUsuarioResponse | null> => {
-  throw new Error("Not implemented");
+export const validar2FA = async (
+  verificador: string,
+  codigo: string
+): Promise<loginUsuarioResponse | null> => {
+  const record = await prisma.usuarioAutenticacao.findFirst({
+    where: {
+      TWFA_Verificador: verificador,
+      TWFA_DataExpiracao: {
+        gte: new Date(),
+      },
+    },
+    include: {
+      usuario: true,
+    },
+  });
+
+  if (!record) return null;
+
+  const decrypted = decriptar(record.TWFA_Codigo);
+  const valido = speakeasy.totp.verify({
+    secret: process.env.TOTP_SECRET!,
+    encoding: "base32",
+    token: codigo,
+    window: 1,
+  });
+
+  if (!valido || decrypted !== codigo) return null;
+
+  const token: JwtPayload = {
+    id: record.usuario.USUA_ID,
+    nome: record.usuario.USUA_Nome,
+    email: record.usuario.USUA_Email,
+  };
+  const tokenValidated = generateToken(token);
+
+  if (!tokenValidated) return null;
+
+  const userLogged: loginUsuarioResponse = {
+    token: tokenValidated,
+    usuario: mapUsuario(record.usuario),
+  };
+
+  return userLogged;
 };
 
 export const logUser = async (
