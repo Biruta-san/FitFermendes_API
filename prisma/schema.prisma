@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Usuario {
+  USUA_ID       Int                   @id @default(autoincrement()) @db.Int
+  USUA_Nome     String                @db.VarChar(125)
+  USUA_Email    String                @db.VarChar(125)
+  USUA_Senha    String                @db.VarChar(255)
+  TwoFactorAuth UsuarioAutenticacao[]
+}
+
+model UsuarioAutenticacao {
+  TWFA_ID              Int      @id @default(autoincrement())
+  USUA_ID              Int
+  TWFA_Codigo          String?  @db.VarChar(255) // Código temporário gerado 
+  TWFA_Verificador     String?  @db.VarChar(255) // Verificador gerado 
+  TWFA_DataExpiracao   DateTime // Hora de expiração do código
+  TWFA_DataCriacao     DateTime @default(now())
+  TWFA_DataAtualizacao DateTime @updatedAt
+
+  Usuario Usuario @relation(fields: [USUA_ID], references: [USUA_ID])
+}
+
+model Modalidade {
+  MODL_ID   Int    @id @default(autoincrement()) @db.Int
+  MODL_Nome String @db.VarChar(100)
+  Aulas     Aula[]
+}
+
+model Aula {
+  AULA_ID    Int         @id @default(autoincrement()) @db.Int
+  MODL_ID    Int         @db.Int
+  Modalidade Modalidade  @relation(fields: [MODL_ID], references: [MODL_ID])
+  Observacao String?     @db.LongText
+  AULA_Data  DateTime    @db.DateTime
+  AlunoAulas AlunoAula[]
+  STAL_ID    Int        @db.Int
+  StatusAula StatusAula @relation(fields: [STAL_ID], references: [STAL_ID])
+}
+
+model StatusAula {
+  STAL_ID   Int    @id @default(autoincrement()) @db.Int
+  STAL_Nome String @db.VarChar(100)
+  Aulas     Aula[]
+}
+
+model Aluno {
+  ALUN_ID              Int         @id @default(autoincrement()) @db.Int
+  ALUN_Nome            String      @db.VarChar(255)
+  ALUN_Altura          Int         @db.Int
+  ALUN_Peso            Decimal     @db.Decimal(5, 2)
+  ALUN_Lesao           String?     @db.VarChar(255)
+  ALUN_Email           String?     @db.VarChar(255)
+  ALUN_Telefone        String?     @db.VarChar(255)
+  ALUN_CPF             String?     @db.VarChar(255)
+  ALUN_DataNascimento  DateTime?   @db.Date
+  ALUN_Objetivo        String?     @db.VarChar(255)
+  ALUN_IndicacaoMedica String?     @db.VarChar(255)
+  ALUN_NomeImagem      String?     @db.LongText
+  ALUN_Base64Imagem    String?     @db.LongText
+  ALUN_Ativo           Boolean     @default(true)
+  AlunoAulas           AlunoAula[]
+}
+
+model AlunoAula {
+  ALUN_ID Int
+  AULA_ID Int
+  Aluno   Aluno @relation(fields: [ALUN_ID], references: [ALUN_ID])
+  Aula    Aula  @relation(fields: [AULA_ID], references: [AULA_ID])
+
+  @@id([ALUN_ID, AULA_ID]) // Composite primary key
+}
