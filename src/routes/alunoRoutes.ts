@@ -15,11 +15,11 @@ const alunoRoutes = Router();
 // Rota para get de todos os alunos
 alunoRoutes.get("/lista", authenticateToken, getListaAluno);
 
-// Rota para get de aluno por id
-alunoRoutes.get("/:id", authenticateToken, getAluno);
-
 // Rota para post de aluno
 alunoRoutes.post("/", authenticateToken, postAluno);
+
+// Rota para get de aluno por id
+alunoRoutes.get("/:id", authenticateToken, getAluno);
 
 // Rota para put de aluno
 alunoRoutes.put("/:id", authenticateToken, putAluno);
