@@ -157,14 +157,8 @@ export const validar2FA = async (
   if (!record || !record.TWFA_Codigo) return null;
 
   const decrypted = decriptar(record.TWFA_Codigo);
-  const valido = speakeasy.totp.verify({
-    secret: process.env.TOTP_SECRET!,
-    encoding: "base32",
-    token: codigo,
-    window: 1,
-  });
 
-  if (!valido || decrypted !== codigo) return null;
+  if (decrypted !== codigo) return null;
 
   const token: JwtPayload = {
     id: record.Usuario.USUA_ID,
