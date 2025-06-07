@@ -4,8 +4,10 @@ import {
   consultarUsuario,
   inserirUsuario,
   listaUsuario,
+  solicitarRecuperacaoSenha,
   validar2FA,
   validarCredenciais,
+  validarRecuperacaoSenha,
 } from "../services/userService";
 import { getErrorMessage, sendError, sendSuccess } from "../utils/apiFunctions";
 import { getUsuario, loginUsuarioResponse } from "../models/userModels";
@@ -510,3 +512,226 @@ export async function putUsuario(req: Request, res: Response) {
     );
   }
 }
+
+// #region RECUPERAR SENHA
+/**
+ * @swagger
+ * /usuario/solicitarRecuperacao:
+ *   post:
+ *     summary: Solicita recuperação de senha para um usuário
+ *     tags:
+ *       - Usuário
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: usuario@example.com
+ *     responses:
+ *       200:
+ *         description: Solicitação de recuperação enviada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Solicitação enviada com sucesso
+ *       400:
+ *         description: Email não encontrado ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: Email inválido
+ *                 message:
+ *                   type: string
+ *                   example: Não foi possível localizar o email informado
+ *       500:
+ *         description: Erro interno ao solicitar recuperação
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: Erro ao solicitar recuperação
+ *                 message:
+ *                   type: string
+ *                   example: Erro desconhecido
+ */
+export async function solicitarRecuperacao(req: Request, res: Response) {
+  try {
+    const { email } = req.body;
+
+    if (!email || typeof email !== "string") {
+      return sendError(
+        res,
+        400,
+        "Email inválido",
+        "O campo 'email' é obrigatório e deve ser uma string válida"
+      );
+    }
+
+    const resultado = await solicitarRecuperacaoSenha(email);
+
+    if (!resultado) {
+      return sendError(
+        res,
+        400,
+        "Email inválido",
+        "Não foi possível localizar o email informado"
+      );
+    }
+
+    return sendSuccess<string>(
+      res,
+      resultado,
+      "Solicitação enviada com sucesso"
+    );
+  } catch (error) {
+    return sendError(
+      res,
+      500,
+      "Erro ao solicitar recuperação",
+      getErrorMessage(error)
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /usuario/recuperarSenha:
+ *   post:
+ *     summary: Recupera a senha do usuário com base no código de verificação
+ *     tags:
+ *       - Usuário
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - codigo
+ *               - novaSenha
+ *             properties:
+ *               codigo:
+ *                 type: string
+ *                 example: "17919c55-0de6-44ea-b3c5-009c0539012a"
+ *               novaSenha:
+ *                 type: string
+ *                 format: password
+ *                 example: "novaSenhaSegura123"
+ *     responses:
+ *       200:
+ *         description: Senha alterada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Senha alterada com sucesso
+ *       400:
+ *         description: Código inválido ou expirado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: Código inválido
+ *                 message:
+ *                   type: string
+ *                   example: Código de recuperação inválido ou expirado
+ *       500:
+ *         description: Erro interno ao tentar redefinir a senha
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: Erro ao redefinir senha
+ *                 message:
+ *                   type: string
+ *                   example: Erro inesperado
+ */
+export async function recuperarSenha(req: Request, res: Response) {
+  try {
+    const { codigo, novaSenha } = req.body;
+
+    if (!codigo || !novaSenha) {
+      return sendError(
+        res,
+        400,
+        "Dados inválidos",
+        "Código e nova senha são obrigatórios"
+      );
+    }
+
+    const resultado = await validarRecuperacaoSenha(codigo, novaSenha);
+
+    if (!resultado) {
+      return sendError(
+        res,
+        400,
+        "Código inválido",
+        "Código de recuperação inválido ou expirado"
+      );
+    }
+
+    return sendSuccess<boolean>(res, true, "Senha alterada com sucesso");
+  } catch (error) {
+    return sendError(
+      res,
+      500,
+      "Erro ao redefinir senha",
+      getErrorMessage(error)
+    );
+  }
+}
+
+// #endregion RECUPERAR SENHA

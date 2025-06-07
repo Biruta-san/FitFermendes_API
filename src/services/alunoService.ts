@@ -29,8 +29,10 @@ export const consultarAluno = async (id: number): Promise<getAluno | null> => {
   return insertedAluno;
 };
 
-export const listaAluno = async (): Promise<getAluno[]> => {
-  const alunos: dbAluno[] = await prisma.aluno.findMany();
+export const listaAluno = async (nome: string | null): Promise<getAluno[]> => {
+  const alunos: dbAluno[] = await prisma.aluno.findMany({
+    where: nome ? { ALUN_Nome: { contains: nome } } : {},
+  });
   const mappedAlunos: getAluno[] = alunos.map((aluno) => mapAluno(aluno));
 
   return mappedAlunos;

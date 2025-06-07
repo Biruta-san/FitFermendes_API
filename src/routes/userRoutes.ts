@@ -7,6 +7,8 @@ import {
   logEmailSenha,
   postUsuario,
   putUsuario,
+  recuperarSenha,
+  solicitarRecuperacao,
 } from "../controllers/userController";
 import { authenticateToken } from "../middleware";
 
@@ -26,6 +28,12 @@ userRoutes.post("/loginEmail", logEmailSenha);
 
 // Realiza validação de 2FA
 userRoutes.post("/2fa", log2FA);
+
+// Solicitar recuperação de senha
+userRoutes.post("/solicitarRecuperacao", solicitarRecuperacao);
+
+// Realizar recuperacao de senha
+userRoutes.post("/recuperarSenha", recuperarSenha);
 
 // Rota para get de usuário por id
 userRoutes.get("/:id", authenticateToken, getUsuario);

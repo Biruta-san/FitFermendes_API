@@ -1,6 +1,11 @@
 import { Router } from "express";
 import { authenticateToken } from "../middleware";
-import { getListaModalidade, postModalidade, putModalidade } from "../controllers/modalidadeController";
+import {
+  getListaModalidade,
+  getModalidade,
+  postModalidade,
+  putModalidade,
+} from "../controllers/modalidadeController";
 
 // Inicializando rotas de modalidade
 const modalidadeRoutes = Router();
@@ -15,6 +20,9 @@ modalidadeRoutes.post("/", authenticateToken, postModalidade);
 
 // Rota para put de modalidade
 modalidadeRoutes.put("/:id", authenticateToken, putModalidade);
+
+// get por id de modalidade
+modalidadeRoutes.get("/:id", authenticateToken, getModalidade);
 
 // #endregion
 

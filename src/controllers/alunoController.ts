@@ -24,6 +24,13 @@ import { getAluno } from "../models/alunoModels";
  *       - Aluno
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: nome
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Nome do aluno para filtro (busca parcial)
  *     responses:
  *       200:
  *         description: Lista de alunos consultada com sucesso
@@ -101,7 +108,8 @@ import { getAluno } from "../models/alunoModels";
  */
 export async function getListaAluno(req: Request, res: Response) {
   try {
-    const aluno = await listaAluno();
+    const nome: string | null = req.query?.nome as string | null;
+    const aluno = await listaAluno(nome);
     if (!aluno)
       return sendError(
         res,

@@ -31,6 +31,7 @@ model UsuarioAutenticacao {
 model Modalidade {
   MODL_ID   Int    @id @default(autoincrement()) @db.Int
   MODL_Nome String @db.VarChar(100)
+  MODL_Cor  String @default("#FF007F") @db.VarChar(7)
   Aulas     Aula[]
 }
 
@@ -41,8 +42,8 @@ model Aula {
   Observacao String?     @db.LongText
   AULA_Data  DateTime    @db.DateTime
   AlunoAulas AlunoAula[]
-  STAL_ID    Int        @db.Int
-  StatusAula StatusAula @relation(fields: [STAL_ID], references: [STAL_ID])
+  STAL_ID    Int         @db.Int
+  StatusAula StatusAula  @relation(fields: [STAL_ID], references: [STAL_ID])
 }
 
 model StatusAula {
