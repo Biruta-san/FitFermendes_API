@@ -13,20 +13,15 @@ dotenv.config();
 const app: Express = express();
 
 // #region CORS
-// Origem permitida — defina via variável de ambiente no Render
-const allowedOrigins = [process.env.WEB_APP_URL || "http://localhost:3000"];
 const corsOptions: cors.CorsOptions = {
-  origin: allowedOrigins,
+  origin: process.env.WEB_APP_URL || "http://localhost:3000",
   methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  credentials: true, // permite cookies/autenticação
+  credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 204, // compatibilidade com navegadores antigos :contentReference[oaicite:1]{index=1}
+  optionsSuccessStatus: 200,
 };
 
-// Aplica antes do JSON e das rotas
 app.use(cors(corsOptions));
-// Pode ser redundante, mas garante resposta a preflights
-app.options("*", cors(corsOptions));
 // #endregion CORS
 
 // JSON parser
