@@ -14,7 +14,7 @@ const app: Express = express();
 
 // #region CORS
 const corsOptions: cors.CorsOptions = {
-  origin: process.env.WEB_APP_URL || "http://localhost:3000",
+  origin: true,
   methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
